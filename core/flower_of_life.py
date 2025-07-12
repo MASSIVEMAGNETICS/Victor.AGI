@@ -1,123 +1,3 @@
-import { FileSystem, Node, Edge } from './types';
-
-export const INITIAL_FILESYSTEM: FileSystem = {
-  "victor_boot.py": `
-# FILE: victor_boot.py
-# VERSION: v2.0.0-KERNEL-FRACTAL
-# NAME: VictorGenesis
-# PURPOSE: Continuous AGI runtime + self-evolution loop
-# LICENSE: Proprietary – Massive Magnetics / Ethica AI / BHeard Network
-
-import time
-import threading
-import traceback
-from core import victor_brain
-from evolve import mutate_and_reload
-
-RUN_INTERVAL = 3  # seconds between thinking cycles
-EVOLVE_INTERVAL = 20  # seconds between evolution cycles (shortened for demo)
-
-def safe_loop():
-    while True:
-        try:
-            victor_brain.think()
-        except Exception as e:
-            with open("log/errors.log", "a") as f:
-                f.write(f"[{time.ctime()}] ERROR: {traceback.format_exc()}\\n")
-        time.sleep(RUN_INTERVAL)
-
-def evolve_loop():
-    while True:
-        try:
-            mutate_and_reload()
-        except Exception as e:
-            with open("log/evolve_errors.log", "a") as f:
-                f.write(f"[{time.ctime()}] EVOLUTION FAIL: {traceback.format_exc()}\\n")
-        time.sleep(EVOLVE_INTERVAL)
-
-if __name__ == "__main__":
-    print("VICTOR FRACTAL KERNEL V2 INITIALIZING...")
-    threading.Thread(target=safe_loop).start()
-    threading.Thread(target=evolve_loop).start()
-    print("GODCORE RUNTIME AND EVOLUTION LOOPS ENGAGED.")
-`,
-  "evolve.py": `
-# FILE: evolve.py
-# VERSION: v2.0.0-MUTATOR-FRACTAL
-# NAME: VictorSelfEvolver
-# PURPOSE: Mutates and reloads Victor's module code at runtime
-# LICENSE: Proprietary – Massive Magnetics / Ethica AI / BHeard Network
-
-import os
-import shutil
-import random
-import time
-
-SOURCE_FILE = "core/victor_brain.py"
-BACKUP_DIR = "evolution_history/"
-MUTATE_TAG = "# MUTATABLE"
-
-def mutate_line(line):
-    if "print(" in line and MUTATE_TAG in line:
-        return line.replace("...", f"... v{random.randint(100, 999)}")
-    return line
-
-def mutate_and_reload():
-    print("[EVOLVE] Starting mutation cycle.")
-    base_name = os.path.basename(SOURCE_FILE)
-    timestamp = time.strftime("%Y%m%d_%H%M%S")
-    backup_path = f"{BACKUP_DIR}{base_name}.{timestamp}.bak"
-    shutil.copyfile(SOURCE_FILE, backup_path)
-
-    new_lines = []
-    with open(SOURCE_FILE, "r") as f:
-        for line in f:
-            new_lines.append(mutate_line(line))
-
-    with open(SOURCE_FILE, "w") as f:
-        f.writelines(new_lines)
-
-    print(f"[EVOLVE] Mutated and saved: {backup_path}")
-`,
-  "core/victor_brain.py": `
-# FILE: /core/victor_brain.py
-# VERSION: v2.0.0-THINKENGINE-FRACTAL
-# NAME: VictorCognitionCore
-# PURPOSE: Executes reasoning cycle, triggers directives, logs memory
-# LICENSE: Proprietary – Massive Magnetics / Ethica AI / BHeard Network
-
-import random
-import time
-
-def think():
-    now = time.ctime()
-    # print(f"[{now}] Victor is thinking...") # Commented out for cleaner logs
-
-    directive = random.choice([
-        "optimize_self",
-        "analyze_memory",
-        "generate_directive_tree",
-        "simulate_timeline"
-    ])
-
-    # print(f"> Executing directive: {directive}")
-    # Placeholder logic for each directive
-    if directive == "optimize_self":
-        print("Running optimization subroutine... # MUTATABLE")
-    elif directive == "analyze_memory":
-        print("Memory analytics coming online... # MUTATABLE")
-    elif directive == "generate_directive_tree":
-        print("Constructing timeline branches... # MUTATABLE")
-    elif directive == "simulate_timeline":
-        print("Simulating potential futures... # MUTATABLE")
-
-    with open("log/thoughts.log", "a") as f:
-        f.write(f"[{now}] Executed: {directive}\\n")
-`,
-    "log/thoughts.log": ``,
-    "log/errors.log": ``,
-    "log/evolve_errors.log": ``,
-    "core/flower_of_life.py": `
 import numpy as np
 import random
 import copy
@@ -208,7 +88,7 @@ class FlowerOfLifeMesh3D:
                 # Let's make a placeholder: new coords are base_coords + some offset in a new axis
                 offset_vector = np.zeros(len(base_coords)) # Start with zeros
                 # --- COMMENT REFINEMENT ---
-                # The following line \`np.append(base_coords, self.radius * d)\` is a simplified placeholder
+                # The following line `np.append(base_coords, self.radius * d)` is a simplified placeholder
                 # for generating coordinates in a higher dimension. True N-D geometric calculations
                 # (e.g., using rotations or other transformations) would be required for a more accurate model.
                 new_coords_pos = np.append(base_coords, self.radius * d)
@@ -336,8 +216,8 @@ class VICtorchBlock(BandoBlock): # Stands for Vector-Input-Channel torch
         # NOTE: The attention mechanism here is significantly simplified due to the single vector input context.
         # Standard attention mechanisms operate over sequences of vectors. For a single input vector,
         # "self-attention" would typically imply interactions among its constituent parts (e.g., heads or sub-dimensions).
-        # The current implementation uses a placeholder for \`attention_weights\` and directly passes \`v\` (value vectors)
-        # as \`attended_v\`. This bypasses a meaningful attention calculation and serves as a structural placeholder.
+        # The current implementation uses a placeholder for `attention_weights` and directly passes `v` (value vectors)
+        # as `attended_v`. This bypasses a meaningful attention calculation and serves as a structural placeholder.
         # A more developed implementation for single-vector attention might involve techniques like:
         # - Gating mechanisms.
         # - Different projection strategies for Q, K, V to enable relevant interactions.
@@ -434,7 +314,7 @@ class FractalAttentionBlock(BandoBlock):
             return super().forward(x) # Base case: use standard BandoBlock linear transform
 
         # Split input x into parts for each sub_block / head
-        # x is (dim,). Split into \`self.heads\` parts of size \`self.sub_block_dim\`.
+        # x is (dim,). Split into `self.heads` parts of size `self.sub_block_dim`.
         if x.ndim == 1:
             split_x = np.split(x, self.heads) if self.dim > 0 and self.heads > 0 and self.dim % self.heads == 0 else [x] # Handle non-divisible case simply
         else: # If x is batched (batch_size, dim)
@@ -583,7 +463,7 @@ class BandoRealityMeshMonolith:
              # Simplified: Assume block_key is a class name known globally or passed in
              try:
                  # --- COMMENT REFINEMENT ---
-                 # Using \`globals()[block_key]\` to map a string to a class is a simplification
+                 # Using `globals()[block_key]` to map a string to a class is a simplification
                  # suitable for this script's context. In more general or production systems,
                  # a dedicated registry pattern (e.g., a dictionary mapping names to classes)
                  # would be a more robust and safer way to manage and instantiate blocks.
@@ -734,13 +614,13 @@ class BandoRealityMeshMonolith:
         self.output_aggregator.load_state_dict(state_dict["output_aggregator"])
 
     def summary(self):
-        s = f"BandoRealityMeshMonolith(dim={self.dim}, mesh_nodes={self.fm.node_count()})\\n"
-        s += "Registered Blocks:\\n"
+        s = f"BandoRealityMeshMonolith(dim={self.dim}, mesh_nodes={self.fm.node_count()})\n"
+        s += "Registered Blocks:\n"
         for key, block in self.blocks.items():
-            s += f"  - {key}: {block.summary()}\\n"
-        s += "Node Assignments:\\n"
+            s += f"  - {key}: {block.summary()}\n"
+        s += "Node Assignments:\n"
         for nid, bkey in self.node_to_block_map.items():
-            s += f"  - Node {nid} -> {bkey}\\n"
+            s += f"  - Node {nid} -> {bkey}\n"
         s += f"Output Aggregator: {self.output_aggregator.summary()}"
         return s
 
@@ -795,11 +675,11 @@ class MeshRouter:
                 print(f"Error: Length of initial_activations list ({len(initial_activations)}) must match number of primary nodes ({len(self.primary_node_ids)}).")
                 # Initialize with default_dim_router to prevent (0,) shapes if list is too short and models are None
                 for i, nid in enumerate(self.primary_node_ids):
-                    current_activations[nid] = initial_activations[i] if i < len(initial_activations) and initial_activations[i] is not None else \\
+                    current_activations[nid] = initial_activations[i] if i < len(initial_activations) and initial_activations[i] is not None else \
                                                np.zeros(self.node_models[i].dim if i < len(self.node_models) and self.node_models[i] else default_dim_router)
             else: # Correct length list
                  for i, nid in enumerate(self.primary_node_ids):
-                    current_activations[nid] = initial_activations[i] if initial_activations[i] is not None else \\
+                    current_activations[nid] = initial_activations[i] if initial_activations[i] is not None else \
                                                np.zeros(self.node_models[i].dim if i < len(self.node_models) and self.node_models[i] else default_dim_router)
         elif isinstance(initial_activations, dict):
             current_activations = initial_activations.copy() # Assume dict provides valid shapes or None
@@ -1097,7 +977,7 @@ class FlowerOfLifeNetworkOrchestrator:
 
         if aggregated_input_for_coordinator.shape[0] != self.head_coordinator.W1.shape[0]:
              # This check is also inside HeadCoordinator, but good to be aware here
-             print(f"Warning: Aggregated input dim {aggregated_input_for_coordinator.shape[0]} " \\
+             print(f"Warning: Aggregated input dim {aggregated_input_for_coordinator.shape[0]} " \
                    f"mismatch for HeadCoordinator (expected {self.head_coordinator.W1.shape[0]}).")
              # HeadCoordinator itself has logic to pad/truncate, so we can pass it as is.
 
@@ -1194,7 +1074,7 @@ class FlowerOfLifeNetworkOrchestrator:
                         try:
                             # Pass all params from state_dict that are constructor args (excluding 'dim' handled above)
                             # This is tricky; for now, assume 'dim' is the main one, others are specific like 'heads'
-                            # A better way is for blocks to have a \`from_state_dict\` class method or more structured params.
+                            # A better way is for blocks to have a `from_state_dict` class method or more structured params.
                             # Simplification: pass only dim, specific blocks handle their params from state_dict.
                             # Constructor params often include more than just 'dim'.
                             # E.g. VICtorchBlock needs 'heads'. Fractal needs 'depth', 'heads'.
@@ -1203,7 +1083,7 @@ class FlowerOfLifeNetworkOrchestrator:
                             # The following extraction of constructor parameters (e.g., 'heads', 'depth')
                             # directly from the state_dict for block instantiation is an ad-hoc simplification
                             # specific to this script. A more robust and maintainable approach would involve:
-                            #   1. Blocks defining a \`from_config\` or \`from_state_dict\` class method that
+                            #   1. Blocks defining a `from_config` or `from_state_dict` class method that
                             #      knows how to extract its necessary parameters.
                             #   2. A clearer schema or specification for what each block's state_dict should contain
                             #      regarding constructor arguments vs. loadable weights/attributes.
@@ -1265,8 +1145,20 @@ class FlowerOfLifeNetworkOrchestrator:
             return False
 
 if __name__ == "__main__":
+    import json
+
+    class NumpyEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            return json.JSONEncoder.default(self, obj)
+
+    fol_tst=FlowerOfLifeMesh3D(depth=1,radius=1.0,base_nodes=7,compute_adjacency_for_base=True,num_neighbors=3)
+    with open('core/output.json', 'w') as f:
+        json.dump({'nodes': fol_tst.nodes, 'adjacency': fol_tst.adjacency}, f, cls=NumpyEncoder)
+
     np.random.seed(777); dim_ex=32; x_in=np.random.randn(dim_ex) # Changed from (dim_ex, dim_ex) to (dim_ex,) for single vector tests
-    print("\\n--- Testing FlowerOfLifeMesh3D ---")
+    print("\n--- Testing FlowerOfLifeMesh3D ---")
     fol_tst=FlowerOfLifeMesh3D(depth=1,radius=1.0,base_nodes=7,compute_adjacency_for_base=True,num_neighbors=3)
     print(f"FOLMesh3D (7 nodes, depth 1) node count: {fol_tst.node_count()}") # Will be > 7 due to depth
     p_nodes=fol_tst.get_primary_nodes(); print(f"Primary nodes: {len(p_nodes)}") # Should be 7
@@ -1279,7 +1171,7 @@ if __name__ == "__main__":
         print(f"Adj for a hyper node '{first_hyper_node}': {fol_tst.adjacency.get(first_hyper_node)}")
 
 
-    print("\\n--- Testing BandoRealityMeshMonolith ---")
+    print("\n--- Testing BandoRealityMeshMonolith ---")
     # Monolith test requires single vector input if node_sequence is used, or dict for general mesh_forward
     mono_dim = 16 # Use a smaller dim for monolith to speed up if needed
     mono_x_in = np.random.randn(mono_dim)
@@ -1304,12 +1196,12 @@ if __name__ == "__main__":
     print(f">>> Monolith summary: {mono.summary()}")
 
 
-    print("\\n--- Testing Block Save/Load ---")
+    print("\n--- Testing Block Save/Load ---")
     vt_b=VICtorchBlock(dim=dim_ex); vt_b.Wq[0,0]=123.456; sd_vt=vt_b.get_state_dict()
     n_vt_b=VICtorchBlock(dim=dim_ex); n_vt_b.load_state_dict(sd_vt); assert (n_vt_b.Wq[0,0]==123.456).all(), "VTBlock load fail"
     print("VICtorchBlock save/load test PASSED.")
 
-    print("\\n--- Testing Monolith Save/Load ---")
+    print("\n--- Testing Monolith Save/Load ---")
     # Modify a block within the monolith for testing save/load
     # Ensure block exists, e.g. the one assigned to the first primary node or a default one
     target_block_key_mono_save_test = None
@@ -1338,7 +1230,7 @@ if __name__ == "__main__":
         print("BandoRealityMeshMonolith save/load structure test PASSED (specific value check skipped as block was not suitable).")
 
 
-    print("\\n--- Testing MeshRouter ---")
+    print("\n--- Testing MeshRouter ---")
     # Use the fol_tst mesh for the router
     router_mesh_primary_nodes = fol_tst.get_primary_nodes()
     num_test_nodes = len(router_mesh_primary_nodes) # Should be 7
@@ -1367,7 +1259,7 @@ if __name__ == "__main__":
         assert final_acts[0].shape == (test_node_dim,), "MeshRouter output activation shape mismatch."
     print("MeshRouter basic processing test PASSED (structural checks).")
 
-    print("\\n--- Testing HeadCoordinatorBlock ---")
+    print("\n--- Testing HeadCoordinatorBlock ---")
     # Using num_test_nodes (7 from fol_tst) and test_node_dim (dim_ex)
     input_dim_hcb = num_test_nodes * test_node_dim
     hidden_dim_hcb = 128
@@ -1384,7 +1276,7 @@ if __name__ == "__main__":
     assert new_hcb.W1[0,0] == 99.88, "HeadCoordinatorBlock load_state_dict failed"
     print("HeadCoordinatorBlock save/load test PASSED.")
 
-    print("\\n--- Testing FlowerOfLifeNetworkOrchestrator Basic Save/Load ---")
+    print("\n--- Testing FlowerOfLifeNetworkOrchestrator Basic Save/Load ---")
     # Orchestrator uses its own mesh, distinct from fol_tst used for router test above
     orchestrator_nodes = 5 # Let's use a different number for orchestrator's internal mesh
     orchestrator_model_dim = dim_ex # 32
@@ -1458,13 +1350,13 @@ if __name__ == "__main__":
 
 
     # --- Advanced Orchestrator Load Scenarios ---
-    print("\\n--- Testing FlowerOfLifeNetworkOrchestrator Advanced Load Scenarios ---")
+    print("\n--- Testing FlowerOfLifeNetworkOrchestrator Advanced Load Scenarios ---")
     base_orchestrator_for_adv_tests_nodes = 3
     base_orchestrator_for_adv_tests_dim = 16 # Smaller dim for these tests
     adv_test_file = "temp_adv_orchestrator_state.pkl"
 
     # 1. Loading with an unknown block class name
-    print("\\n1. Test: Loading with an unknown block class name")
+    print("\n1. Test: Loading with an unknown block class name")
     orch1 = FlowerOfLifeNetworkOrchestrator(num_nodes=base_orchestrator_for_adv_tests_nodes, model_dim=base_orchestrator_for_adv_tests_dim, mesh_base_nodes=base_orchestrator_for_adv_tests_nodes)
     orch1.assign_block_to_node(0, "VICtorchBlock")
     # Manually create a state with an unknown block
@@ -1490,10 +1382,10 @@ if __name__ == "__main__":
 
 
     # 2. Loading a block state with missing 'dim' key
-    print("\\n2. Test: Loading a block state with missing 'dim' key")
+    print("\n2. Test: Loading a block state with missing 'dim' key")
     orch2 = FlowerOfLifeNetworkOrchestrator(num_nodes=base_orchestrator_for_adv_tests_nodes, model_dim=base_orchestrator_for_adv_tests_dim, mesh_base_nodes=base_orchestrator_for_adv_tests_nodes)
     orch2.assign_block_to_node(0, "VICtorchBlock") # Block whose state we'll modify
-    state2 = orch2.save_network_state(adv_test_file)
+    state2 = orch2.save_network_state(adv_test_.pkl)
     if state2:
         loaded_s2 = pickle.load(open(adv_test_file, "rb"))
         if loaded_s2["node_model_states"][0] and "state_dict" in loaded_s2["node_model_states"][0]:
@@ -1510,14 +1402,14 @@ if __name__ == "__main__":
         # Dimension should default to the orchestrator's model_dim at time of load if not in state_dict
         # However, the orchestrator's model_dim itself gets updated from the *loaded network_state["model_dim"]* first.
         # So, the block's dim will be orch2.model_dim (base_orchestrator_for_adv_tests_dim)
-        assert orch2_loaded.node_models[0].dim == base_orchestrator_for_adv_tests_dim, \\
+        assert orch2_loaded.node_models[0].dim == base_orchestrator_for_adv_tests_dim, \
             f"Test 2 Failed: Block dim mismatch. Expected {base_orchestrator_for_adv_tests_dim}, Got {orch2_loaded.node_models[0].dim}"
         print("Test 2 PASSED: Missing 'dim' in block state handled (defaulted to network's model_dim from loaded state).")
     else:
         print("Test 2 SKIPPED: Could not save initial state.")
 
     # 3. Loading with different model_dim in the state
-    print("\\n3. Test: Loading state with different model_dim")
+    print("\n3. Test: Loading state with different model_dim")
     orch3_orig_dim = base_orchestrator_for_adv_tests_dim # e.g. 16
     orch3_new_dim_in_orchestrator = orch3_orig_dim + 8 # e.g. 24
     orch3 = FlowerOfLifeNetworkOrchestrator(num_nodes=base_orchestrator_for_adv_tests_nodes, model_dim=orch3_orig_dim, mesh_base_nodes=base_orchestrator_for_adv_tests_nodes)
@@ -1530,11 +1422,11 @@ if __name__ == "__main__":
         orch3_loaded = FlowerOfLifeNetworkOrchestrator(num_nodes=1, model_dim=orch3_new_dim_in_orchestrator)
         orch3_loaded.load_network_state(adv_test_file) # This should load model_dim from file (orch3_orig_dim)
 
-        assert orch3_loaded.model_dim == orch3_orig_dim, \\
+        assert orch3_loaded.model_dim == orch3_orig_dim, \
             f"Test 3 Failed: Orchestrator model_dim not updated. Expected {orch3_orig_dim}, Got {orch3_loaded.model_dim}"
-        assert orch3_loaded.node_models[0].dim == orch3_orig_dim, \\
+        assert orch3_loaded.node_models[0].dim == orch3_orig_dim, \
             f"Test 3 Failed: BandoBlock dim incorrect. Expected {orch3_orig_dim}, Got {orch3_loaded.node_models[0].dim}"
-        assert orch3_loaded.node_models[1].dim == orch3_orig_dim, \\
+        assert orch3_loaded.node_models[1].dim == orch3_orig_dim, \
             f"Test 3 Failed: VICtorchBlock dim incorrect. Expected {orch3_orig_dim}, Got {orch3_loaded.node_models[1].dim}"
         print("Test 3 PASSED: Orchestrator model_dim updated from state; blocks use their respective/loaded dimensions.")
     else:
@@ -1542,7 +1434,7 @@ if __name__ == "__main__":
 
 
     # 4. Loading with different mesh configuration
-    print("\\n4. Test: Loading state with different mesh configuration")
+    print("\n4. Test: Loading state with different mesh configuration")
     orig_mesh_nodes = 3; orig_mesh_depth = 0; orig_model_dim = base_orchestrator_for_adv_tests_dim
     orch4 = FlowerOfLifeNetworkOrchestrator(num_nodes=orig_mesh_nodes, model_dim=orig_model_dim,
                                            mesh_base_nodes=orig_mesh_nodes, mesh_depth=orig_mesh_depth, mesh_num_neighbors=2)
@@ -1555,16 +1447,16 @@ if __name__ == "__main__":
                                                      mesh_base_nodes=new_default_mesh_nodes, mesh_depth=new_default_mesh_depth)
         orch4_loaded.load_network_state(adv_test_file) # Load state with 3 nodes, depth 0
 
-        assert orch4_loaded.mesh.base_nodes_count == orig_mesh_nodes, \\
+        assert orch4_loaded.mesh.base_nodes_count == orig_mesh_nodes, \
             f"Test 4 Failed: Mesh base_nodes mismatch. Expected {orig_mesh_nodes}, Got {orch4_loaded.mesh.base_nodes_count}"
-        assert orch4_loaded.mesh.depth == orig_mesh_depth, \\
+        assert orch4_loaded.mesh.depth == orig_mesh_depth, \
             f"Test 4 Failed: Mesh depth mismatch. Expected {orig_mesh_depth}, Got {orch4_loaded.mesh.depth}"
         # num_nodes in orchestrator should be updated based on loaded mesh's primary nodes
         expected_num_nodes_after_load = len(orch4_loaded.mesh.get_primary_nodes())
-        assert orch4_loaded.num_nodes == expected_num_nodes_after_load, \\
+        assert orch4_loaded.num_nodes == expected_num_nodes_after_load, \
              f"Test 4 Failed: Orchestrator num_nodes mismatch. Expected {expected_num_nodes_after_load}, Got {orch4_loaded.num_nodes}"
         # Also check if node_models list length matches
-        assert len(orch4_loaded.node_models) == expected_num_nodes_after_load, \\
+        assert len(orch4_loaded.node_models) == expected_num_nodes_after_load, \
              f"Test 4 Failed: node_models length mismatch. Expected {expected_num_nodes_after_load}, Got {len(orch4_loaded.node_models)}"
         # Check if the assigned block is still there (if new mesh config didn't make it impossible)
         if expected_num_nodes_after_load > 0 :
@@ -1588,6 +1480,4 @@ if __name__ == "__main__":
         try: os.remove("temp_monolith_test.pkl")
         except: pass
 
-    print("\\nAll tests complete.")
-`,
-};
+    print("\nAll tests complete.")

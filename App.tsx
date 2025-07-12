@@ -6,7 +6,7 @@ import FileTree from './components/FileTree';
 import CodeViewer from './components/CodeViewer';
 import LeftDock from './components/LeftDock';
 import Console from './components/Console';
-import NodeGraph from './components/NodeGraph';
+import FlowerOfLife from './components/FlowerOfLife';
 import ChatView from './components/ChatView';
 import TrainView from './components/TrainView';
 import DockView from './components/DockView';
@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [evolutionHistory, setEvolutionHistory] = useState<string[]>([]);
   const [status, setStatus] = useState<'THINKING' | 'EVOLVING' | 'IDLE' | 'BOOTING'>('BOOTING');
   const [lastEvolution, setLastEvolution] = useState('N/A');
-  const [activeView, setActiveView] = useState<AppView>('BRAIN_MAP');
+  const [activeView, setActiveView] = useState<AppView>('FLOWER_OF_LIFE');
   const [countdown, setCountdown] = useState(20);
 
   const addLog = useCallback((message: string, type: LogEntry['type']) => {
@@ -106,8 +106,8 @@ const App: React.FC = () => {
             </div>
           </div>
         );
-      case 'BRAIN_MAP':
-        return <NodeGraph status={status} />;
+      case 'FLOWER_OF_LIFE':
+        return <FlowerOfLife />;
       case 'CHAT':
         return <ChatView addLog={addLog} />;
       case 'TRAIN':
