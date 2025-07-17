@@ -7,9 +7,10 @@ import CodeViewer from './components/CodeViewer';
 import LeftDock from './components/LeftDock';
 import Console from './components/Console';
 import NodeGraph from './components/NodeGraph';
-import ChatView from './components/ChatView';
+import ChatView from './ChatView';
 import TrainView from './components/TrainView';
 import DockView from './components/DockView';
+import MusicGenView from './MusicGenView';
 
 const App: React.FC = () => {
   const [fileSystem, setFileSystem] = useState<FileSystem>(INITIAL_FILESYSTEM);
@@ -114,6 +115,8 @@ const App: React.FC = () => {
         return <TrainView />;
       case 'DOCK':
         return <DockView />;
+      case 'MUSIC':
+        return <MusicGenView addLog={addLog} />;
       default:
         return <NodeGraph status={status} />;
     }
@@ -170,7 +173,15 @@ const App: React.FC = () => {
       `}</style>
       <TopStatusBar status={status} lastEvolution={lastEvolution} countdown={countdown} />
       <div className="flex flex-grow min-h-0">
-        <LeftDock activeView={activeView} setActiveView={setActiveView} />
+        {/* Placeholder for LeftDock */}
+        <div className="flex flex-col p-2 bg-obsidian border-r border-violet">
+            <button onClick={() => setActiveView('BRAIN_MAP')} className={`p-2 my-1 rounded ${activeView === 'BRAIN_MAP' ? 'bg-violet' : ''}`}>Brain</button>
+            <button onClick={() => setActiveView('OVERVIEW')} className={`p-2 my-1 rounded ${activeView === 'OVERVIEW' ? 'bg-violet' : ''}`}>Overview</button>
+            <button onClick={() => setActiveView('CHAT')} className={`p-2 my-1 rounded ${activeView === 'CHAT' ? 'bg-violet' : ''}`}>Chat</button>
+            <button onClick={() => setActiveView('MUSIC')} className={`p-2 my-1 rounded ${activeView === 'MUSIC' ? 'bg-violet' : ''}`}>Music</button>
+            <button onClick={() => setActiveView('TRAIN')} className={`p-2 my-1 rounded ${activeView === 'TRAIN' ? 'bg-violet' : ''}`}>Train</button>
+            <button onClick={() => setActiveView('DOCK')} className={`p-2 my-1 rounded ${activeView === 'DOCK' ? 'bg-violet' : ''}`}>Dock</button>
+        </div>
         <main className="flex-grow p-4 flex flex-col min-h-0 bg-grid-glow">
           {renderActiveView()}
         </main>
