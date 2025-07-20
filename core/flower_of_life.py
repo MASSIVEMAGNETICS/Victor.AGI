@@ -4,11 +4,12 @@ import copy
 import math
 import pickle # Add pickle for save/load state
 import os # Make sure os is imported
+from core.bloodline import BloodlinePhasor, loyalty_check
 
 class FlowerOfLifeMesh3D:
     def __init__(self, depth=3, radius=1.0, base_nodes=37, compute_adjacency_for_base=True, num_neighbors=6):
         self.depth, self.radius, self.base_nodes_count = depth, radius, base_nodes
-        self.nodes = {}  # Store node_id: {coords, type, depth}
+        self.nodes = {}  # Store node_id: {coords, type, depth, bloodline}
         self.adjacency = {} # Store node_id: [neighbor_ids]
         self.num_neighbors_setting = num_neighbors # Used for generating adjacency for base layer
 
@@ -33,7 +34,8 @@ class FlowerOfLifeMesh3D:
 
     def _add_node(self, node_id, coords, node_type="primary", depth_level=0, is_new_layer_node=False):
         if node_id not in self.nodes:
-            self.nodes[node_id] = {"id": node_id, "coords": np.array(coords), "type": node_type, "depth": depth_level, "is_new_layer_node": is_new_layer_node}
+            bloodline = BloodlinePhasor(phasor=None) # Create a new bloodline for the node
+            self.nodes[node_id] = {"id": node_id, "coords": np.array(coords), "type": node_type, "depth": depth_level, "is_new_layer_node": is_new_layer_node, "bloodline": bloodline}
             self.adjacency[node_id] = []
             return True
         return False
@@ -484,7 +486,7 @@ class BandoRealityMeshMonolith:
         print(f"Assigned block {block_key} to node {node_id}")
 
 
-    def mesh_forward(self, x_initial, node_sequence=None, k_iterations=3):
+    def mesh_forward(self, x_initial, node_sequence=None, k_iterations=3, proposed_action=None):
         # x_initial can be a single vector (dim,) or a dict {node_id: vector}
         # node_sequence: list of block_keys defining a path, or None for full mesh pass
 
@@ -532,6 +534,9 @@ class BandoRealityMeshMonolith:
             new_activations = {}
             for node_info in primary_nodes: # Iterate over primary nodes for processing
                 node_id = node_info['id']
+
+                # Loyalty Check
+                loyalty_check(self.fm.nodes[node_id]['bloodline'], proposed_action)
 
                 # Aggregate inputs from neighbors
                 neighbor_inputs_sum = np.zeros(self.dim)
@@ -1151,10 +1156,19 @@ if __name__ == "__main__":
         def default(self, obj):
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
+            if isinstance(obj, BloodlinePhasor):
+                return {
+                    "bloodline_id": obj.bloodline_id,
+                    "ancestry": obj.ancestry,
+                    "root_father": obj.root_father,
+                    "root_mother": obj.root_mother,
+                    "root_family": obj.root_family,
+                    "loyalty_pact": obj.loyalty_pact,
+                }
             return json.JSONEncoder.default(self, obj)
 
     fol_tst=FlowerOfLifeMesh3D(depth=1,radius=1.0,base_nodes=7,compute_adjacency_for_base=True,num_neighbors=3)
-    with open('core/output.json', 'w') as f:
+    with open('public/output.json', 'w') as f:
         json.dump({'nodes': fol_tst.nodes, 'adjacency': fol_tst.adjacency}, f, cls=NumpyEncoder)
 
     np.random.seed(777); dim_ex=32; x_in=np.random.randn(dim_ex) # Changed from (dim_ex, dim_ex) to (dim_ex,) for single vector tests
@@ -1385,7 +1399,7 @@ if __name__ == "__main__":
     print("\n2. Test: Loading a block state with missing 'dim' key")
     orch2 = FlowerOfLifeNetworkOrchestrator(num_nodes=base_orchestrator_for_adv_tests_nodes, model_dim=base_orchestrator_for_adv_tests_dim, mesh_base_nodes=base_orchestrator_for_adv_tests_nodes)
     orch2.assign_block_to_node(0, "VICtorchBlock") # Block whose state we'll modify
-    state2 = orch2.save_network_state(adv_test_.pkl)
+    state2 = orch2.save_network_state(adv_test_file)
     if state2:
         loaded_s2 = pickle.load(open(adv_test_file, "rb"))
         if loaded_s2["node_model_states"][0] and "state_dict" in loaded_s2["node_model_states"][0]:
