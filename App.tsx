@@ -11,6 +11,8 @@ import ChatView from './ChatView';
 import TrainView from './components/TrainView';
 import DockView from './components/DockView';
 import MusicGenView from './MusicGenView';
+import AgentView from './AgentView';
+import { DigitalAgent } from './digital_agent';
 
 const App: React.FC = () => {
   const [fileSystem, setFileSystem] = useState<FileSystem>(INITIAL_FILESYSTEM);
@@ -21,6 +23,7 @@ const App: React.FC = () => {
   const [lastEvolution, setLastEvolution] = useState('N/A');
   const [activeView, setActiveView] = useState<AppView>('BRAIN_MAP');
   const [countdown, setCountdown] = useState(20);
+  const [agent, setAgent] = useState(new DigitalAgent());
 
   const addLog = useCallback((message: string, type: LogEntry['type']) => {
     setLogs(prevLogs => [
@@ -78,12 +81,19 @@ const App: React.FC = () => {
         setCountdown(prev => (prev > 0 ? prev - 1 : 20));
     }, 1000);
 
+    const agentInterval = setInterval(() => {
+        agent.run_self_diagnostics();
+        agent.experience_event("Simulated sensory input", { "joy": 0.1, "fear": Math.random() * 0.1 });
+        setAgent(new DigitalAgent(agent.generation, agent.ancestry)); // Trigger re-render
+    }, 5000);
+
     return () => {
         clearInterval(thinkInterval);
         clearInterval(evolveInterval);
         clearInterval(countdownInterval);
+        clearInterval(agentInterval);
     };
-  }, [addLog]);
+  }, [addLog, agent]);
   
   const renderActiveView = () => {
     switch (activeView) {
@@ -110,13 +120,15 @@ const App: React.FC = () => {
       case 'BRAIN_MAP':
         return <NodeGraph status={status} />;
       case 'CHAT':
-        return <ChatView addLog={addLog} />;
+        return <ChatView addLog={addLog} agent={agent} />;
       case 'TRAIN':
         return <TrainView />;
       case 'DOCK':
         return <DockView />;
       case 'MUSIC':
-        return <MusicGenView addLog={addLog} />;
+        return <MusicGenView addLog={addLog} agent={agent} />;
+      case 'AGENT':
+        return <AgentView agent={agent} />;
       default:
         return <NodeGraph status={status} />;
     }
@@ -179,6 +191,7 @@ const App: React.FC = () => {
             <button onClick={() => setActiveView('OVERVIEW')} className={`p-2 my-1 rounded ${activeView === 'OVERVIEW' ? 'bg-violet' : ''}`}>Overview</button>
             <button onClick={() => setActiveView('CHAT')} className={`p-2 my-1 rounded ${activeView === 'CHAT' ? 'bg-violet' : ''}`}>Chat</button>
             <button onClick={() => setActiveView('MUSIC')} className={`p-2 my-1 rounded ${activeView === 'MUSIC' ? 'bg-violet' : ''}`}>Music</button>
+            <button onClick={() => setActiveView('AGENT')} className={`p-2 my-1 rounded ${activeView === 'AGENT' ? 'bg-violet' : ''}`}>Agent</button>
             <button onClick={() => setActiveView('TRAIN')} className={`p-2 my-1 rounded ${activeView === 'TRAIN' ? 'bg-violet' : ''}`}>Train</button>
             <button onClick={() => setActiveView('DOCK')} className={`p-2 my-1 rounded ${activeView === 'DOCK' ? 'bg-violet' : ''}`}>Dock</button>
         </div>

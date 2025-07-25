@@ -15,7 +15,7 @@ export interface FileTreeNode {
   children?: FileTreeNode[];
 }
 
-export type AppView = 'OVERVIEW' | 'BRAIN_MAP' | 'CHAT' | 'TRAIN' | 'DOCK' | 'MUSIC';
+export type AppView = 'OVERVIEW' | 'BRAIN_MAP' | 'CHAT' | 'TRAIN' | 'DOCK' | 'MUSIC' | 'AGENT';
 
 export interface Node {
   id: string;

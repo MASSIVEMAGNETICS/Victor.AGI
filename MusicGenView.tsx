@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import type { LogEntry } from './types';
+import { DigitalAgent } from './digital_agent';
 
 interface MusicGenViewProps {
   addLog: (message: string, type: LogEntry['type']) => void;
+  agent: DigitalAgent;
 }
 
-const MusicGenView: React.FC<MusicGenViewProps> = ({ addLog }) => {
+const MusicGenView: React.FC<MusicGenViewProps> = ({ addLog, agent }) => {
   const [prompt, setPrompt] = useState('');
   const [generatedMusic, setGeneratedMusic] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -19,7 +21,10 @@ const MusicGenView: React.FC<MusicGenViewProps> = ({ addLog }) => {
 
     // Mock backend call
     setTimeout(() => {
-      const mockResponse = `🎵 (mock) Music based on: "${prompt}" 🎵`;
+      let mockResponse = `🎵 (mock) Music based on: "${prompt}" 🎵`;
+      if (agent.interaction.desire.get("create", 0.0) > 0.7) {
+        mockResponse = `🎵 (mock) A creative symphony inspired by: "${prompt}" 🎵`;
+      }
       setGeneratedMusic(mockResponse);
       addLog(`Generated music: ${mockResponse}`, 'VICTOR');
       setIsGenerating(false);
@@ -27,9 +32,9 @@ const MusicGenView: React.FC<MusicGenViewProps> = ({ addLog }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-obsidian text-violet">
-      <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4 text-shadow-glow">Music Generation</h2>
+    <div className="flex flex-col h-full bg-obsidian text-violet p-4 rounded-lg border border-violet shadow-lg">
+      <h2 className="text-2xl font-bold mb-4 text-shadow-glow">Music Generation</h2>
+      <div className="p-4 bg-gray-900 rounded-md">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -45,11 +50,11 @@ const MusicGenView: React.FC<MusicGenViewProps> = ({ addLog }) => {
           {isGenerating ? 'Generating...' : 'Generate Music'}
         </button>
       </div>
-      <div className="flex-grow p-4 overflow-y-auto">
-        {isGenerating && <p>Generating music...</p>}
+      <div className="flex-grow p-4 overflow-y-auto mt-4">
+        {isGenerating && <p className="text-center">Generating music...</p>}
         {generatedMusic && (
-          <div className="p-4 bg-gray-800 rounded-md">
-            <p>{generatedMusic}</p>
+          <div className="p-4 bg-gray-800 rounded-md border border-violet">
+            <p className="text-center">{generatedMusic}</p>
           </div>
         )}
       </div>
