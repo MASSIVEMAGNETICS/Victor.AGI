@@ -125,10 +125,13 @@ class VictorGigaChadBlock(nn.Module):
         output = attn_res + ffn_out
         return output
 
+from digital_agent import DigitalAgent
+
 # --- Victor GigaChad Transformer Model ---
 class VictorGigaChadTransformer(nn.Module):
-    def __init__(self, vocab_size, d_model, n_heads, d_ff, n_layers, fractal_depth=2, max_len=2048, dropout=0.1, fused_inference=False):
+    def __init__(self, vocab_size, d_model, n_heads, d_ff, n_layers, fractal_depth=2, max_len=2048, dropout=0.1, fused_inference=False, agent: DigitalAgent = None):
         super().__init__()
+        self.agent = agent
         self.embed = nn.Embedding(vocab_size, d_model)
         self.pos_embed = nn.Parameter(torch.zeros(1, max_len, d_model))
         self.blocks = nn.ModuleList([
@@ -137,6 +140,9 @@ class VictorGigaChadTransformer(nn.Module):
         ])
         self.norm = nn.LayerNorm(d_model)
         self.lm_head = QuantLinear(d_model, vocab_size, bits=8)
+
+    def set_agent(self, agent):
+        self.agent = agent
 
     def enable_fused_inference(self):
         for block in self.blocks:
@@ -152,7 +158,14 @@ class VictorGigaChadTransformer(nn.Module):
         for block in self.blocks:
             x = block(x, mask)
         x = self.norm(x)
-        return self.lm_head(x)
+        logits = self.lm_head(x)
+
+        if self.agent and self.agent.next_gen.reality_bending_index > 0.5:
+            # High reality bending index, let's get weird
+            # (This is a placeholder for more complex logic)
+            logits = logits * self.agent.next_gen.reality_bending_index
+
+        return logits
 
 # --- Inference Engine ---
 class VictorGigaChadInference:
