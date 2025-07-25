@@ -175,7 +175,10 @@ class GPT(nn.Module):
             'ln_f': nn.OmegaLayerNorm(config.n_embd, bias=config.bias),
         })
         self.lm_head = nn.Linear(config.n_embd, config.output_vocab_size, bias=False)
-        self.meta_evolution = MetaEvolution(self)
+        self.meta_evolution = MetaEvolution(self, None) # Placeholder for agent
+
+    def set_agent(self, agent):
+        self.meta_evolution.agent = agent
 
     # --- Next brutal upgrades ---
     # 1. Memory KV compression:
@@ -248,8 +251,9 @@ import threading
 
 class MetaEvolution:
     """A class to handle the self-evolving aspect of the model."""
-    def __init__(self, model):
+    def __init__(self, model, agent):
         self.model = model
+        self.agent = agent
         self.evolution_history = []
 
     def evolve(self, evolution_instruction):
@@ -274,6 +278,14 @@ class MetaEvolution:
         """
         This method would run in a background thread to avoid blocking the main process.
         """
+        if self.agent and self.agent.self_modification.self_mutating > 0.7:
+            # High mutation drive, let's evolve
+            # (This is a placeholder for more complex logic)
+            print("Agent has high mutation drive, proceeding with evolution.")
+        else:
+            print("Agent does not have sufficient mutation drive, skipping evolution.")
+            return
+
         # 1. Parse the evolution instruction
         # new_config_params = json.loads(evolution_instruction)
 

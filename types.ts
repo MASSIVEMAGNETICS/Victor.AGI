@@ -15,7 +15,11 @@ export interface FileTreeNode {
   children?: FileTreeNode[];
 }
 
+#<<<<<<< phoenix-hotfix
+export type AppView = 'OVERVIEW' | 'BRAIN_MAP' | 'CHAT' | 'TRAIN' | 'DOCK' | 'MUSIC' | 'AGENT';
+=======
 export type AppView = 'OVERVIEW' | 'FLOWER_OF_LIFE' | 'CHAT' | 'TRAIN' | 'DOCK';
+#>>>>>>> main
 
 export interface Node {
   id: string;

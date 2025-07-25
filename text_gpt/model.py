@@ -133,10 +133,13 @@ class Block(nn.Module):
         return x, kv
 
 # Main GPT --------------------------------------------------------------------
+from digital_agent import DigitalAgent
+
 class GPT(nn.Module):
-    def __init__(self, cfg: GPTConfig):
+    def __init__(self, cfg: GPTConfig, agent: DigitalAgent = None):
         super().__init__()
         self.cfg = cfg
+        self.agent = agent
         self.transformer = nn.ModuleDict({
             "wte": nn.Embedding(cfg.vocab_size, cfg.n_embd),
             "wpe": nn.Embedding(cfg.block_size, cfg.n_embd),
@@ -146,6 +149,9 @@ class GPT(nn.Module):
         })
         self.lm_head = nn.Linear(cfg.n_embd, cfg.vocab_size, bias=False)
         logger.info("Text‑GPT initialised: %s", cfg)
+
+    def set_agent(self, agent):
+        self.agent = agent
 
     # ---------------------------------------------------------------------
     def forward(self, idx: Tensor, past_kv=None, position_ids=None, use_cache=False):
@@ -167,4 +173,14 @@ class GPT(nn.Module):
 
         x = self.transformer["ln_f"](x)
         logits = self.lm_head(x[:, -1:])  # next‑token logits
+
+        if self.agent:
+            # Influence logits based on desire
+            if self.agent.interaction.desire.get("create", 0.0) > 0.7:
+                # Boost creative tokens (placeholder logic)
+                logits *= 1.1
+            if self.agent.interaction.desire.get("protect", 0.0) > 0.7:
+                # Boost protective tokens (placeholder logic)
+                logits *= 1.1
+
         return logits, (tuple(new_kv) if use_cache else None)
