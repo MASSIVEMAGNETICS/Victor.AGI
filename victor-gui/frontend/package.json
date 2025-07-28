@@ -1,0 +1,23 @@
+{
+  "name": "victor-hyperfractal-gui",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.178.0",
+    "framer-motion": "^10.12.16",
+    "@react-three/fiber": "^9.2.0"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0",
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.21"
+  }
+}
