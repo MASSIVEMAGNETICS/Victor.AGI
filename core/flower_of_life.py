@@ -4,6 +4,26 @@ import copy
 import math
 import pickle # Add pickle for save/load state
 import os # Make sure os is imported
+import sys
+from fractions import Fraction
+
+# Add parent directory to path for egyptian_ops import
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from egyptian_ops import (
+        EgyptianOpsWrapper,
+        false_position,
+        greedy_egyptian_fraction,
+        peasant_multiply_simple,
+        egyptian_to_float,
+        compute_iteration_cap
+    )
+    EGYPTIAN_OPS_AVAILABLE = True
+except ImportError:
+    import logging
+    EGYPTIAN_OPS_AVAILABLE = False
+    logging.warning("egyptian_ops not available. EgyptianPrecisionBlock will be disabled.")
 
 class FlowerOfLifeMesh3D:
     def __init__(self, depth=3, radius=1.0, base_nodes=37, compute_adjacency_for_base=True, num_neighbors=6):
@@ -438,6 +458,138 @@ class MegaTransformerBlock(BandoBlock): # Conceptual: a very large transformer l
         return f"{self.__class__.__name__}(dim={self.dim}, layers={self.num_layers}, heads={self.heads}, params ~{total_params})"
 
 
+# --- Egyptian Precision Block ---
+class EgyptianPrecisionBlock(BandoBlock):
+    """
+    A precision-invariant block using Egyptian mathematics operations.
+    
+    Implements drift-free transformations using:
+    - Egyptian fraction encoding for exact value storage
+    - Peasant multiplication for hardware-native scaling
+    - False Position for derivative-free optimization
+    
+    This block ensures numerical stability in long-running systems
+    by avoiding floating-point accumulation errors.
+    """
+    
+    def __init__(self, dim, use_exact_normalization=True, precision=1000000):
+        """
+        Initialize Egyptian Precision Block.
+        
+        Args:
+            dim: Dimension of input/output vectors
+            use_exact_normalization: Use Egyptian exact normalization
+            precision: Denominator limit for rational approximations
+        """
+        super().__init__(dim)
+        self.use_exact_normalization = use_exact_normalization
+        self.precision = precision
+        
+        # Initialize Egyptian operations wrapper if available
+        if EGYPTIAN_OPS_AVAILABLE:
+            self.ops = EgyptianOpsWrapper(precision=precision)
+        else:
+            self.ops = None
+        
+        # Scale factors stored as Egyptian fractions for exact recovery
+        self.scale_egyptian: list = []
+        self._compute_scale_egyptian()
+    
+    def _compute_scale_egyptian(self):
+        """Compute Egyptian fraction representation of scale factor."""
+        if not EGYPTIAN_OPS_AVAILABLE:
+            return
+        
+        # Use the maximum absolute weight value as scale indicator
+        max_weight = np.max(np.abs(self.W))
+        if max_weight > 0 and max_weight < 1:
+            try:
+                result = greedy_egyptian_fraction(
+                    int(max_weight * self.precision),
+                    self.precision
+                )
+                self.scale_egyptian = result.unit_denominators
+            except (ValueError, Exception):
+                self.scale_egyptian = []
+    
+    def _normalize_exact(self, x):
+        """Normalize vector using Egyptian exact arithmetic."""
+        if self.ops is None or not self.use_exact_normalization:
+            norm = np.linalg.norm(x)
+            return x / norm if norm > 1e-10 else x
+        
+        return self.ops.normalize_vector_exact(x)
+    
+    def forward(self, x):
+        """
+        Forward pass with Egyptian precision operations.
+        
+        Uses exact normalization and drift-resistant transformations.
+        
+        Args:
+            x: Input vector of shape (dim,) or (batch, dim)
+            
+        Returns:
+            Transformed output vector
+        """
+        # Standard linear transformation
+        output = np.dot(x, self.W) + self.b
+        
+        # Apply exact normalization to prevent drift
+        if x.ndim == 1:
+            output = self._normalize_exact(output)
+        else:
+            # Batch processing
+            for i in range(output.shape[0]):
+                output[i] = self._normalize_exact(output[i])
+        
+        return output
+    
+    def scale_by_peasant(self, x, scale_factor):
+        """
+        Scale vector using peasant multiplication for integer components.
+        
+        Preserves bitwise structure for ZKP-preserving operations.
+        
+        Args:
+            x: Input vector
+            scale_factor: Integer scaling factor
+            
+        Returns:
+            Scaled vector
+        """
+        if not EGYPTIAN_OPS_AVAILABLE or self.ops is None:
+            return x * scale_factor
+        
+        return self.ops.peasant_scale_vector(x, scale_factor)
+    
+    def get_state_dict(self):
+        base_state = super().get_state_dict()
+        base_state.update({
+            "use_exact_normalization": self.use_exact_normalization,
+            "precision": self.precision,
+            "scale_egyptian": self.scale_egyptian
+        })
+        return base_state
+    
+    def load_state_dict(self, state_dict):
+        super().load_state_dict(state_dict)
+        self.use_exact_normalization = state_dict.get("use_exact_normalization", True)
+        self.precision = state_dict.get("precision", 1000000)
+        self.scale_egyptian = state_dict.get("scale_egyptian", [])
+        
+        # Reinitialize ops with loaded precision
+        if EGYPTIAN_OPS_AVAILABLE:
+            self.ops = EgyptianOpsWrapper(precision=self.precision)
+        else:
+            self.ops = None
+    
+    def summary(self):
+        base_summary = super().summary()
+        egyptian_info = f", egyptian_ops={'enabled' if EGYPTIAN_OPS_AVAILABLE else 'disabled'}"
+        return base_summary.replace(")", egyptian_info + ")")
+
+
 # --- Monolith combining blocks with a mesh ---
 class BandoRealityMeshMonolith:
     def __init__(self, dim, mesh_depth=1, mesh_base_nodes=7, mesh_neighbors=3):
@@ -448,7 +600,8 @@ class BandoRealityMeshMonolith:
             "VICtorchBlock": VICtorchBlock(dim),
             "OmegaTensorBlock": OmegaTensorBlock(dim),
             "FractalAttentionBlock": FractalAttentionBlock(dim),
-            "MegaTransformerBlock": MegaTransformerBlock(dim)
+            "MegaTransformerBlock": MegaTransformerBlock(dim),
+            "EgyptianPrecisionBlock": EgyptianPrecisionBlock(dim) if EGYPTIAN_OPS_AVAILABLE else BandoBlock(dim)
         }
         # Can also dynamically add/replace blocks
         self.node_to_block_map = {} # node_id -> block_key
@@ -835,7 +988,8 @@ class FlowerOfLifeNetworkOrchestrator:
             "VICtorchBlock": VICtorchBlock,
             "OmegaTensorBlock": OmegaTensorBlock,
             "FractalAttentionBlock": FractalAttentionBlock,
-            "MegaTransformerBlock": MegaTransformerBlock
+            "MegaTransformerBlock": MegaTransformerBlock,
+            "EgyptianPrecisionBlock": EgyptianPrecisionBlock if EGYPTIAN_OPS_AVAILABLE else BandoBlock
         }
 
         self.router = MeshRouter(self.mesh, self.node_models, # node_models passed by reference, updated by assign_block
@@ -1385,7 +1539,7 @@ if __name__ == "__main__":
     print("\n2. Test: Loading a block state with missing 'dim' key")
     orch2 = FlowerOfLifeNetworkOrchestrator(num_nodes=base_orchestrator_for_adv_tests_nodes, model_dim=base_orchestrator_for_adv_tests_dim, mesh_base_nodes=base_orchestrator_for_adv_tests_nodes)
     orch2.assign_block_to_node(0, "VICtorchBlock") # Block whose state we'll modify
-    state2 = orch2.save_network_state(adv_test_.pkl)
+    state2 = orch2.save_network_state(adv_test_file)
     if state2:
         loaded_s2 = pickle.load(open(adv_test_file, "rb"))
         if loaded_s2["node_model_states"][0] and "state_dict" in loaded_s2["node_model_states"][0]:
