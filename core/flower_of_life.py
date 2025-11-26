@@ -21,8 +21,9 @@ try:
     )
     EGYPTIAN_OPS_AVAILABLE = True
 except ImportError:
+    import logging
     EGYPTIAN_OPS_AVAILABLE = False
-    print("Warning: egyptian_ops not available. EgyptianPrecisionBlock will be disabled.")
+    logging.warning("egyptian_ops not available. EgyptianPrecisionBlock will be disabled.")
 
 class FlowerOfLifeMesh3D:
     def __init__(self, depth=3, radius=1.0, base_nodes=37, compute_adjacency_for_base=True, num_neighbors=6):

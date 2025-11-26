@@ -51,6 +51,22 @@ from egyptian_ops import (
 
 
 # =============================================================================
+# CONSTANTS
+# =============================================================================
+
+# Default precision for rational approximations (denominator limit)
+DEFAULT_PRECISION = 1000000
+
+# Signature hash modulus for shard identification
+SIGNATURE_HASH_MODULUS = 1000000
+
+# Signature fraction range bounds
+SIGNATURE_FRAC_RANGE = 999
+SIGNATURE_FRAC_DIVISOR = 1000.0
+SIGNATURE_FRAC_OFFSET = 0.001
+
+
+# =============================================================================
 # HOLOGRAPHIC FRACTAL MEMORY WITH EGYPTIAN PRECISION (HLHFM-E)
 # =============================================================================
 
@@ -151,7 +167,7 @@ class HLHFMEgyptian:
     def _encode_emotion(self, emotion_value: float) -> List[int]:
         """Encode emotion value as Egyptian fractions."""
         if emotion_value <= 0:
-            return [1000000]  # Represents very small value
+            return [DEFAULT_PRECISION]  # Represents very small value
         if emotion_value >= 1:
             emotion_value = 0.999
         return self.ops.encode_value_egyptian(emotion_value)
@@ -195,8 +211,8 @@ class HLHFMEgyptian:
             semantic_embedding = self._normalize(semantic_hint)
         
         # Create Egyptian signature from content hash
-        content_hash = abs(hash(content.tobytes())) % 1000000
-        signature_frac = (content_hash % 999) / 1000.0 + 0.001
+        content_hash = abs(hash(content.tobytes())) % SIGNATURE_HASH_MODULUS
+        signature_frac = (content_hash % SIGNATURE_FRAC_RANGE) / SIGNATURE_FRAC_DIVISOR + SIGNATURE_FRAC_OFFSET
         egyptian_signature = self.ops.encode_value_egyptian(signature_frac)
         
         # Apply liquid gate dynamics

@@ -367,9 +367,13 @@ def peasant_multiply(a: int, b: int) -> PeasantMultiplyResult:
         if b < 0:
             b = -b
             sign *= -1
-        result = peasant_multiply(a, b)
-        result.result *= sign
-        return result
+        inner_result = peasant_multiply(a, b)
+        # Create new result with corrected sign rather than mutating
+        return PeasantMultiplyResult(
+            result=inner_result.result * sign,
+            steps=inner_result.steps,
+            bit_representation=inner_result.bit_representation
+        )
     
     original_a = a
     result = 0
