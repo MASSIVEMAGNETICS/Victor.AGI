@@ -13,5 +13,8 @@ This contains everything you need to run your app locally.
 3. Run the app:
    `npm run dev`
 
-## HyperFractal Transformer
-The `hyperfractal_transformer.py` module defines a PyTorch architecture combining residual fractal embeddings with a transformer encoder. It is a minimal starting point for experimentation with deeper, multi-scale attention networks.
+## Experimental Model
+The repository includes `paradigm_shatterer_model.py`, a small prototype
+featuring fractal-inspired fusion blocks intended to bypass typical scaling
+limits. Run it with `python paradigm_shatterer_model.py` to see a dummy
+forward pass.
