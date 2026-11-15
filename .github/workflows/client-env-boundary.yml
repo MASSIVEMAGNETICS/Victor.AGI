@@ -1,0 +1,34 @@
+name: Client Credential Boundary
+
+on:
+  pull_request:
+    paths:
+      - 'vite.config.ts'
+      - 'README.md'
+      - 'package.json'
+      - 'tests/client-env-boundary.test.mjs'
+      - '.github/workflows/client-env-boundary.yml'
+  push:
+    branches: ['main']
+    paths:
+      - 'vite.config.ts'
+      - 'README.md'
+      - 'package.json'
+      - 'tests/client-env-boundary.test.mjs'
+      - '.github/workflows/client-env-boundary.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  client-credential-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify client credential boundary
+        run: npm run test:security
