@@ -6,6 +6,8 @@ on:
       - 'vite.config.ts'
       - 'README.md'
       - 'package.json'
+      - '.gitignore'
+      - '.env.local'
       - 'tests/client-env-boundary.test.mjs'
       - '.github/workflows/client-env-boundary.yml'
   push:
@@ -14,6 +16,8 @@ on:
       - 'vite.config.ts'
       - 'README.md'
       - 'package.json'
+      - '.gitignore'
+      - '.env.local'
       - 'tests/client-env-boundary.test.mjs'
       - '.github/workflows/client-env-boundary.yml'
 
